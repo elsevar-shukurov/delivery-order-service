@@ -1,0 +1,62 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: sənin_adın
+      changes:
+        - createTable:
+            tableName: orders
+            remarks: "Sifarişlərin saxlanması üçün əsas cədvəl"
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: status
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+                  remarks: "CREATED, ASSIGNED, PICKED_UP, DELIVERED, REJECTED"
+              - column:
+                  name: courier_id
+                  type: BIGINT
+                  constraints:
+                    nullable: true
+                  remarks: "Təyin olunmuş kurierin ID-si (Courier Service-dən)"
+              - column:
+                  name: delivery_address
+                  type: TEXT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: pickup_address
+                  type: TEXT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: price
+                  type: DECIMAL(10, 2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: true
+        - addDefaultValue:
+            tableName: orders
+            columnName: updated_at
+            defaultValueComputed: CURRENT_TIMESTAMP
+      rollback:
+        - dropTable:
+            tableName: orders
