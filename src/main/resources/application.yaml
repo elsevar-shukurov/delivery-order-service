@@ -1,0 +1,12 @@
+server:
+  port: 8081
+spring:
+  datasource:
+    url:
+      jdbc:postgresql://localhost:5432/order_db
+    username: postgres
+    password: 1234
+  jpa:
+    show-sql: true
+  liquibase:
+    change-log: classpath:db/changelog/changelog-master.yaml
