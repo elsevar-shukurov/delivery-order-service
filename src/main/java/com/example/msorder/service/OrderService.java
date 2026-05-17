@@ -1,34 +1,47 @@
 package com.example.msorder.service;
 
+import com.example.msorder.client.CourierClient;
+import com.example.msorder.client.dto.CourierResponse;
 import com.example.msorder.dao.Order;
 import com.example.msorder.dao.OrderRepository;
 import com.example.msorder.dto.OrderCreateRequest;
 import com.example.msorder.dto.OrderResponse;
-import com.example.msorder.enums.OrderStatus;
+import com.example.msorder.exceptions.CourierUnavailableException;
 import com.example.msorder.exceptions.InvalidOrderStatusException;
 import com.example.msorder.exceptions.OrderNotFoundException;
-import com.example.msorder.mapper.OrderMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.math.BigDecimal;
 import java.util.List;
 
+import static com.example.msorder.client.enums.CourierStatus.BUSY;
+import static com.example.msorder.enums.OrderStatus.ASSIGNED;
 import static com.example.msorder.enums.OrderStatus.DELIVERED;
+import static com.example.msorder.mapper.OrderMapper.toEntity;
 import static com.example.msorder.mapper.OrderMapper.toResponse;
 
 @Service
 @RequiredArgsConstructor
 public class OrderService {
     private final OrderRepository orderRepository;
+    private final CourierClient courierClient;
 
-    public void createOrder(OrderCreateRequest orderCreateRequest) {
-        BigDecimal calculatedPrice = calculatePrice(orderCreateRequest);
-        Order order= OrderMapper.toEntity(orderCreateRequest);
-        order.setCourierId(1L);
-        order.setStatus(OrderStatus.ASSIGNED);
-        order.setPrice(calculatedPrice);
+    public void createOrder(OrderCreateRequest request) {
+        var calculatedPrice = calculatePrice(request);
+
+        List<CourierResponse> availableCouriers = courierClient.getAvailableCouriers();
+        if (availableCouriers.isEmpty()) {
+            throw new CourierUnavailableException();
+        }
+
+        CourierResponse assignedCourier = availableCouriers.getFirst();
+
+        System.out.println(assignedCourier.getId());
+        System.out.println(assignedCourier.getName());
+        courierClient.updateCourierStatus(assignedCourier.getId(), BUSY);
+
+        var order= toEntity(request, assignedCourier.getId(), calculatedPrice, ASSIGNED);
         orderRepository.save(order);
     }
 
@@ -40,12 +53,18 @@ public class OrderService {
     }
 
     public OrderResponse getOrderById(Long id) {
-        return toResponse(fetchOrderIfExists(id));
+        Order order= fetchOrderIfExists(id);
+        OrderResponse orderResponse= toResponse(order);
+
+        CourierResponse courier= courierClient.getCourierById(order.getCourierId());
+        orderResponse.setCourierName(courier.getName());
+
+        return orderResponse;
     }
 
     public void updateStatusToDelivered(Long id){
         Order order = fetchOrderIfExists(id);
-        if (order.getStatus() != OrderStatus.ASSIGNED) {
+        if (order.getStatus() != ASSIGNED) {
             throw new InvalidOrderStatusException("Order can be delivered only when status is ASSIGNED, current: "
                     + order.getStatus());
         }

@@ -1,11 +1,11 @@
 databaseChangeLog:
   - changeSet:
       id: 1
-      author: sənin_adın
+      author: user
       changes:
         - createTable:
             tableName: orders
-            remarks: "Sifarişlərin saxlanması üçün əsas cədvəl"
+            remarks: "Table for restoring order information"
             columns:
               - column:
                   name: id
@@ -19,13 +19,11 @@ databaseChangeLog:
                   type: VARCHAR(20)
                   constraints:
                     nullable: false
-                  remarks: "CREATED, ASSIGNED, PICKED_UP, DELIVERED, REJECTED"
               - column:
                   name: courier_id
                   type: BIGINT
                   constraints:
                     nullable: true
-                  remarks: "Təyin olunmuş kurierin ID-si (Courier Service-dən)"
               - column:
                   name: delivery_address
                   type: TEXT

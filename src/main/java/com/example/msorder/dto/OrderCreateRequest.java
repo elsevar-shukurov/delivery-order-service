@@ -12,5 +12,4 @@ public class OrderCreateRequest {
     private String pickupAddress;
 
     private String deliveryAddress;
-
 }

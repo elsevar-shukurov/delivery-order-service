@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.OK;
 
 @RestController
 @RequiredArgsConstructor
@@ -19,14 +18,12 @@ public class OrderController {
     private final OrderService orderService;
 
     @GetMapping
-    @ResponseStatus(OK)
     public List<OrderResponse> getAllOrders() {
        return orderService.getAllOrders();
     }
 
     @GetMapping("/{id}")
-    @ResponseStatus(OK)
-    public OrderResponse getOrdersById(@PathVariable Long id) {
+    public OrderResponse getOrderById(@PathVariable Long id) {
         return orderService.getOrderById(id);
     }
 
@@ -37,7 +34,6 @@ public class OrderController {
     }
 
     @PatchMapping("/{id}/deliver")
-    @ResponseStatus(OK)
     public void updateOrderStatus(@PathVariable Long id) {
         orderService.updateStatusToDelivered(id);
     }
